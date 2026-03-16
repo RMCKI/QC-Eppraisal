@@ -32,7 +32,7 @@
       width: 100%;
       height: auto;
     }
-    h1, h2, h3 {
+    h1, h2 {
       margin-top: 0;
     }
     .grid {
@@ -103,6 +103,11 @@
       color: #475569;
       margin-top: 8px;
     }
+    .success {
+      color: green;
+      font-weight: bold;
+      margin-top: 10px;
+    }
     @media (max-width: 800px) {
       .grid {
         grid-template-columns: 1fr;
@@ -120,7 +125,16 @@
         <img src="https://raw.githubusercontent.com/RMCKI/QC-Eppraisal/main/logo.png" alt="Eppraisal Network Logo" onerror="this.style.display='none'">
       </div>
       <h1>Eppraisal Network QC Tool</h1>
-      <div class="note">Fill the QC checklist, edit anything manually, then export a QC PDF.</div>
+      <div class="note">Upload an appraisal PDF, auto-fill the QC, edit if needed, then export the QC PDF.</div>
+    </div>
+
+    <div class="card">
+      <h2>Upload Appraisal PDF</h2>
+      <input type="file" id="pdfUpload" accept=".pdf" />
+      <div class="btn-row">
+        <button onclick="autoFillFromPDF()">Auto Fill From PDF</button>
+      </div>
+      <div id="status" class="success"></div>
     </div>
 
     <div class="card">
@@ -132,31 +146,31 @@
         </div>
         <div>
           <label>Client</label>
-          <input id="client" placeholder="Gibsland Bank and Trust">
+          <input id="client">
         </div>
         <div>
           <label>Borrower</label>
-          <input id="borrower" placeholder="Borrower name">
+          <input id="borrower">
         </div>
         <div>
           <label>Appraiser</label>
-          <input id="appraiser" placeholder="Daniel M. Fowler">
+          <input id="appraiser">
         </div>
         <div class="full">
           <label>Address</label>
-          <input id="address" placeholder="1952 Walnut Street, Shreveport, LA 71103">
+          <input id="address">
         </div>
         <div>
           <label>Effective Date</label>
-          <input id="effectiveDate" placeholder="07/01/2026">
+          <input id="effectiveDate">
         </div>
         <div>
           <label>Appraised Value</label>
-          <input id="appraisedValue" placeholder="$150,000">
+          <input id="appraisedValue">
         </div>
         <div>
           <label>Reviewed Date</label>
-          <input id="reviewedDate" placeholder="03/16/2026">
+          <input id="reviewedDate">
         </div>
         <div>
           <label>Reviewer</label>
@@ -238,53 +252,135 @@
 
       <div class="section-title">Reviewer Notes</div>
       <label>43. Reviewer Notes</label>
-      <textarea id="q43" placeholder="Enter reviewer notes"></textarea>
+      <textarea id="q43"></textarea>
 
       <div class="btn-row">
-        <button onclick="fill71506()">Auto Fill Sample 71506</button>
         <button class="secondary" onclick="downloadQC()">Download QC PDF</button>
       </div>
-      <div class="note">For now, the Auto Fill button fills the current sample file. Later you can add upload-based automation.</div>
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
-    function val(id) {
-      return document.getElementById(id).value || "";
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+
+    function setValue(id, value) {
+      if (document.getElementById(id)) {
+        document.getElementById(id).value = value || "";
+      }
     }
 
-    function fill71506() {
-      document.getElementById("fileNumber").value = "71506";
-      document.getElementById("client").value = "Gibsland Bank and Trust";
-      document.getElementById("borrower").value = "Walnut Group Home Project";
-      document.getElementById("appraiser").value = "Daniel M. Fowler – LA CGA #G4128";
-      document.getElementById("address").value = "1952 Walnut Street, Shreveport, LA 71103";
-      document.getElementById("effectiveDate").value = "07/01/2026 (As Proposed)";
-      document.getElementById("appraisedValue").value = "$150,000";
-      document.getElementById("reviewedDate").value = new Date().toLocaleDateString();
-      document.getElementById("reviewer").value = "Robert McKinnon";
+    function setYesNo(id, value) {
+      setValue(id, value);
+    }
 
-      const answers = {
-        q5:"YES", q6:"YES", q7:"YES", q8:"YES", q9:"YES", q10:"YES",
-        q11:"YES", q12:"YES", q13:"YES", q14:"YES", q15:"YES", q16:"YES", q17:"YES",
-        q18:"YES", q19:"NO", q20:"YES", q21:"YES",
-        q22:"YES",
-        q23:"YES", q24:"YES",
-        q25:"YES", q26:"YES", q27:"YES",
-        q28:"YES", q29:"YES", q30:"YES",
-        q31:"NO", q32:"NO", q33:"NO", q34:"NO", q35:"NO",
-        q36:"YES", q37:"YES", q38:"NO",
-        q39:"YES", q40:"YES", q41:"YES",
-        q42:"LOW TO MODERATE RISK"
-      };
+    async function autoFillFromPDF() {
+      const fileInput = document.getElementById("pdfUpload");
+      const status = document.getElementById("status");
 
-      Object.keys(answers).forEach(id => {
-        document.getElementById(id).value = answers[id];
-      });
+      if (!fileInput.files.length) {
+        status.textContent = "Please upload a PDF first.";
+        return;
+      }
 
-      document.getElementById("q43").value =
-        "The appraisal includes both the Cost and Sales Comparison approaches. The Income Approach was not developed due to lack of reliable rental data. The report relies on an extraordinary assumption that renovations will be completed as proposed. The value conclusion appears reasonable within the context of the analysis.";
+      status.textContent = "Reading PDF...";
+
+      const file = fileInput.files[0];
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+      let fullText = "";
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(" ");
+        fullText += " " + pageText;
+      }
+
+      const text = fullText.replace(/\s+/g, " ").trim();
+      const lower = text.toLowerCase();
+
+      const addressMatch = text.match(/LOCATED AT\s+(.*?)\s+PREPARED FOR/i);
+      const clientMatch = text.match(/PREPARED FOR\s+(.*?)\s+PO BOX/i);
+      const valueMatch = text.match(/FINAL EST\. OF VALUE:\s*\$([\d,]+)/i) || text.match(/---\$(\d[\d,]*)/i);
+      const appraiserMatch = text.match(/BY\s+CYPRESS VALUATION\s+(.+?)\s+\d{3,4}\s+IRVING PLACE/i);
+      const effectiveMatch = text.match(/DATE OF VALUE:\s*(.*?)\s+DATE OF SITE VISIT/i) || text.match(/AS OF\s+(.*?)\s+\(/i);
+      const reportDateMatch = text.match(/DATE OF REPORT:\s*(.*?)\s+VALUE CONCLUSIONS/i);
+      const siteVisitMatch = text.match(/DATE OF SITE VISIT:\s*(.*?)\s+DATE OF REPORT/i);
+
+      setValue("address", addressMatch ? addressMatch[1] : "");
+      setValue("client", clientMatch ? clientMatch[1] : "");
+      setValue("appraiser", appraiserMatch ? appraiserMatch[1] : "");
+      setValue("effectiveDate", effectiveMatch ? effectiveMatch[1] : "");
+      setValue("appraisedValue", valueMatch ? "$" + valueMatch[1] : "");
+      setValue("reviewedDate", new Date().toLocaleDateString());
+      setValue("reviewer", "Robert McKinnon");
+
+      setYesNo("q5", "YES");
+      setYesNo("q6", lower.includes("assumptions and limiting conditions") ? "YES" : "NO");
+      setYesNo("q7", lower.includes("respectfully submitted") ? "YES" : "NO");
+      setYesNo("q8", lower.includes("reconciliation") || lower.includes("final est. of value") ? "YES" : "NO");
+      setYesNo("q9", lower.includes("personally inspected") || lower.includes("site visit") ? "YES" : "NO");
+      setYesNo("q10", lower.includes("date of value") || lower.includes("effective date of value") ? "YES" : "NO");
+
+      setYesNo("q11", lower.includes("site data") ? "YES" : "NO");
+      setYesNo("q12", lower.includes("vacant") || lower.includes("occupied") ? "YES" : "N/A");
+      setYesNo("q13", lower.includes("description of improvements") || lower.includes("building:") ? "YES" : "NO");
+      setYesNo("q14", lower.includes("mechanical and equipment") ? "YES" : "N/A");
+      setYesNo("q15", lower.includes("tax assessor") || lower.includes("taxes for") ? "YES" : "NO");
+      setYesNo("q16", lower.includes("zoning:") ? "YES" : "NO");
+      setYesNo("q17", lower.includes("mineral rights") ? "YES" : "NO");
+
+      setYesNo("q18", lower.includes("description of improvements") ? "YES" : "NO");
+      setYesNo("q19", lower.includes("deferred maintenance") ? "YES" : "NO");
+      setYesNo("q20", lower.includes("photographs of subject property") ? "YES" : "NO");
+      setYesNo("q21", lower.includes("floor plan") || lower.includes("subject [") || lower.includes("area calculations summary") ? "YES" : "NO");
+
+      setYesNo("q22", lower.includes("highest and best use") ? "YES" : "NO");
+
+      setYesNo("q23", lower.includes("land sale no.") || lower.includes("comparable land sales") ? "YES" : "NO");
+      setYesNo("q24", lower.includes("conclusion of land value") ? "YES" : "NO");
+
+      const costUsed = lower.includes("cost approach");
+      setYesNo("q25", costUsed ? "YES" : "NO");
+      setYesNo("q26", lower.includes("depreciation") ? "YES" : costUsed ? "NO" : "N/A");
+      setYesNo("q27", lower.includes("indicated value by cost approach") || lower.includes("cost approach value") ? "YES" : costUsed ? "NO" : "N/A");
+
+      const salesUsed = lower.includes("sales comparison approach");
+      setYesNo("q28", salesUsed ? "YES" : "NO");
+      setYesNo("q29", lower.includes("improved sale no.") || lower.includes("comparable improved sales") ? "YES" : salesUsed ? "NO" : "N/A");
+      setYesNo("q30", lower.includes("final est. of value") || lower.includes("reconciliation") ? "YES" : salesUsed ? "NO" : "N/A");
+
+      const incomeNotUsed = lower.includes("income approach") && (lower.includes("not performed") || lower.includes("n/a"));
+      setYesNo("q31", incomeNotUsed ? "NO" : lower.includes("income approach") ? "YES" : "NO");
+      setYesNo("q32", lower.includes("rent roll") ? "YES" : "NO");
+      setYesNo("q33", lower.includes("comparable rentals") ? "YES" : "NO");
+      setYesNo("q34", lower.includes("direct capitalization") ? "YES" : "NO");
+      setYesNo("q35", lower.includes("discounted cash flow") || lower.includes("dcf") ? "YES" : "NO");
+
+      setYesNo("q36", lower.includes("the three standard approaches") || lower.includes("reconciliation") ? "YES" : "NO");
+      setYesNo("q37", "YES");
+      setYesNo("q38", lower.includes("as is") ? "YES" : lower.includes("as proposed") ? "NO" : "N/A");
+
+      setYesNo("q39", lower.includes("uspap") ? "YES" : "NO");
+      setYesNo("q40", lower.includes("scope of work") || lower.includes("certification of value") ? "YES" : "NO");
+      setYesNo("q41", lower.includes("real estate appraiser number") || lower.includes("certified general appraiser") || lower.includes("licensed general") ? "YES" : "NO");
+
+      if (lower.includes("extraordinary assumption")) {
+        setValue("q42", "LOW TO MODERATE RISK");
+        setValue("q43", "The appraisal relies on an extraordinary assumption. Review that assumption carefully and confirm completion/conditions match the report before relying on value.");
+      } else {
+        setValue("q42", "LOW RISK");
+        setValue("q43", "Appraisal appears to contain the core support required by the QC template. Review final value, comparable support, and scope before issuing.");
+      }
+
+      status.textContent = "QC auto-filled. Review and edit anything before downloading.";
+    }
+
+    function val(id) {
+      return document.getElementById(id).value || "";
     }
 
     function downloadQC() {
