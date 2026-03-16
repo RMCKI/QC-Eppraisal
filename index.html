@@ -387,7 +387,6 @@ function downloadQC() {
   const doc = new jsPDF();
   let y = 20;
   const pageHeight = doc.internal.pageSize.height;
-  const pageWidth = doc.internal.pageSize.width;
 
   function newPageIfNeeded(extra = 12) {
     if (y + extra > pageHeight - 20) {
@@ -434,12 +433,10 @@ function downloadQC() {
     return document.getElementById(id).value || "";
   }
 
-  // Try to draw logo if available on the live site
   const logo = new Image();
- logo.src = "logo.png";
+  logo.src = "logo.png";
 
   const buildPdf = () => {
-    // Header
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text("Commercial Appraisal QC Review", 20, y);
@@ -546,4 +543,3 @@ function downloadQC() {
     buildPdf();
   };
 }
-   
