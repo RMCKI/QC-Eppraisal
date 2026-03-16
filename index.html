@@ -275,271 +275,127 @@
       setValue(id, value);
     }
 
-    async function autoFillFromPDF() {
-      const fileInput = document.getElementById("pdfUpload");
-      const status = document.getElementById("status");
+   async function autoFillFromPDF() {
+  const fileInput = document.getElementById("pdfUpload");
+  const status = document.getElementById("status");
 
-      if (!fileInput.files.length) {
-        status.textContent = "Please upload a PDF first.";
-        return;
-      }
+  if (!fileInput.files.length) {
+    status.textContent = "Please upload a PDF first.";
+    return;
+  }
 
-      status.textContent = "Reading PDF...";
+  try {
+    status.textContent = "Reading PDF...";
 
-      const file = fileInput.files[0];
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const file = fileInput.files[0];
+    const arrayBuffer = await file.arrayBuffer();
 
-      let fullText = "";
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = "";
 
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        const pageText = textContent.items.map(item => item.str).join(" ");
-        fullText += " " + pageText;
-      }
-
-      const text = fullText.replace(/\s+/g, " ").trim();
-      const lower = text.toLowerCase();
-
-      const addressMatch = text.match(/LOCATED AT\s+(.*?)\s+PREPARED FOR/i);
-      const clientMatch = text.match(/PREPARED FOR\s+(.*?)\s+PO BOX/i);
-      const valueMatch = text.match(/FINAL EST\. OF VALUE:\s*\$([\d,]+)/i) || text.match(/---\$(\d[\d,]*)/i);
-      const appraiserMatch = text.match(/BY\s+CYPRESS VALUATION\s+(.+?)\s+\d{3,4}\s+IRVING PLACE/i);
-      const effectiveMatch = text.match(/DATE OF VALUE:\s*(.*?)\s+DATE OF SITE VISIT/i) || text.match(/AS OF\s+(.*?)\s+\(/i);
-      const reportDateMatch = text.match(/DATE OF REPORT:\s*(.*?)\s+VALUE CONCLUSIONS/i);
-      const siteVisitMatch = text.match(/DATE OF SITE VISIT:\s*(.*?)\s+DATE OF REPORT/i);
-
-      setValue("address", addressMatch ? addressMatch[1] : "");
-      setValue("client", clientMatch ? clientMatch[1] : "");
-      setValue("appraiser", appraiserMatch ? appraiserMatch[1] : "");
-      setValue("effectiveDate", effectiveMatch ? effectiveMatch[1] : "");
-      setValue("appraisedValue", valueMatch ? "$" + valueMatch[1] : "");
-      setValue("reviewedDate", new Date().toLocaleDateString());
-      setValue("reviewer", "Robert McKinnon");
-
-      setYesNo("q5", "YES");
-      setYesNo("q6", lower.includes("assumptions and limiting conditions") ? "YES" : "NO");
-      setYesNo("q7", lower.includes("respectfully submitted") ? "YES" : "NO");
-      setYesNo("q8", lower.includes("reconciliation") || lower.includes("final est. of value") ? "YES" : "NO");
-      setYesNo("q9", lower.includes("personally inspected") || lower.includes("site visit") ? "YES" : "NO");
-      setYesNo("q10", lower.includes("date of value") || lower.includes("effective date of value") ? "YES" : "NO");
-
-      setYesNo("q11", lower.includes("site data") ? "YES" : "NO");
-      setYesNo("q12", lower.includes("vacant") || lower.includes("occupied") ? "YES" : "N/A");
-      setYesNo("q13", lower.includes("description of improvements") || lower.includes("building:") ? "YES" : "NO");
-      setYesNo("q14", lower.includes("mechanical and equipment") ? "YES" : "N/A");
-      setYesNo("q15", lower.includes("tax assessor") || lower.includes("taxes for") ? "YES" : "NO");
-      setYesNo("q16", lower.includes("zoning:") ? "YES" : "NO");
-      setYesNo("q17", lower.includes("mineral rights") ? "YES" : "NO");
-
-      setYesNo("q18", lower.includes("description of improvements") ? "YES" : "NO");
-      setYesNo("q19", lower.includes("deferred maintenance") ? "YES" : "NO");
-      setYesNo("q20", lower.includes("photographs of subject property") ? "YES" : "NO");
-      setYesNo("q21", lower.includes("floor plan") || lower.includes("subject [") || lower.includes("area calculations summary") ? "YES" : "NO");
-
-      setYesNo("q22", lower.includes("highest and best use") ? "YES" : "NO");
-
-      setYesNo("q23", lower.includes("land sale no.") || lower.includes("comparable land sales") ? "YES" : "NO");
-      setYesNo("q24", lower.includes("conclusion of land value") ? "YES" : "NO");
-
-      const costUsed = lower.includes("cost approach");
-      setYesNo("q25", costUsed ? "YES" : "NO");
-      setYesNo("q26", lower.includes("depreciation") ? "YES" : costUsed ? "NO" : "N/A");
-      setYesNo("q27", lower.includes("indicated value by cost approach") || lower.includes("cost approach value") ? "YES" : costUsed ? "NO" : "N/A");
-
-      const salesUsed = lower.includes("sales comparison approach");
-      setYesNo("q28", salesUsed ? "YES" : "NO");
-      setYesNo("q29", lower.includes("improved sale no.") || lower.includes("comparable improved sales") ? "YES" : salesUsed ? "NO" : "N/A");
-      setYesNo("q30", lower.includes("final est. of value") || lower.includes("reconciliation") ? "YES" : salesUsed ? "NO" : "N/A");
-
-      const incomeNotUsed = lower.includes("income approach") && (lower.includes("not performed") || lower.includes("n/a"));
-      setYesNo("q31", incomeNotUsed ? "NO" : lower.includes("income approach") ? "YES" : "NO");
-      setYesNo("q32", lower.includes("rent roll") ? "YES" : "NO");
-      setYesNo("q33", lower.includes("comparable rentals") ? "YES" : "NO");
-      setYesNo("q34", lower.includes("direct capitalization") ? "YES" : "NO");
-      setYesNo("q35", lower.includes("discounted cash flow") || lower.includes("dcf") ? "YES" : "NO");
-
-      setYesNo("q36", lower.includes("the three standard approaches") || lower.includes("reconciliation") ? "YES" : "NO");
-      setYesNo("q37", "YES");
-      setYesNo("q38", lower.includes("as is") ? "YES" : lower.includes("as proposed") ? "NO" : "N/A");
-
-      setYesNo("q39", lower.includes("uspap") ? "YES" : "NO");
-      setYesNo("q40", lower.includes("scope of work") || lower.includes("certification of value") ? "YES" : "NO");
-      setYesNo("q41", lower.includes("real estate appraiser number") || lower.includes("certified general appraiser") || lower.includes("licensed general") ? "YES" : "NO");
-
-      if (lower.includes("extraordinary assumption")) {
-        setValue("q42", "LOW TO MODERATE RISK");
-        setValue("q43", "The appraisal relies on an extraordinary assumption. Review that assumption carefully and confirm completion/conditions match the report before relying on value.");
-      } else {
-        setValue("q42", "LOW RISK");
-        setValue("q43", "Appraisal appears to contain the core support required by the QC template. Review final value, comparable support, and scope before issuing.");
-      }
-
-      status.textContent = "QC auto-filled. Review and edit anything before downloading.";
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items
+        .map(item => ("str" in item ? item.str : ""))
+        .join(" ");
+      fullText += " " + pageText;
     }
 
-    function val(id) {
-      return document.getElementById(id).value || "";
+    const text = fullText.replace(/\s+/g, " ").trim();
+    const lower = text.toLowerCase();
+
+    if (!text || text.length < 50) {
+      status.textContent = "No readable text found in this PDF. It may be scanned or image-only.";
+      return;
     }
-function downloadQC() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  let y = 20;
-  const pageHeight = doc.internal.pageSize.height;
 
-  function newPageIfNeeded(extra = 12) {
-    if (y + extra > pageHeight - 20) {
-      doc.addPage();
-      y = 20;
+    status.textContent = "PDF text found. Auto-filling QC...";
+
+    const addressMatch = text.match(/LOCATED AT\s+(.*?)\s+PREPARED FOR/i) ||
+                         text.match(/ADDRESS:\s*(.*?)\s+(LEGAL|IMPROVEMENT SIZE|SITE AREA|INTENDED USER)/i);
+
+    const clientMatch = text.match(/PREPARED FOR\s+(.*?)\s+PO BOX/i) ||
+                        text.match(/INTENDED USER:\s*(.*?)\s+INTENDED USE/i);
+
+    const valueMatch = text.match(/FINAL EST\. OF VALUE:\s*\$([\d,]+)/i) ||
+                       text.match(/APPRAISED VALUE:\s*\$([\d,]+)/i) ||
+                       text.match(/---\$(\d[\d,]*)/i);
+
+    const appraiserMatch = text.match(/BY\s+CYPRESS VALUATION\s+(.+?)\s+\d{3,4}\s+IRVING PLACE/i) ||
+                           text.match(/Daniel M\. Fowler/i);
+
+    const effectiveMatch = text.match(/DATE OF VALUE:\s*(.*?)\s+DATE OF SITE VISIT/i) ||
+                           text.match(/AS OF\s+(.*?)\s+\(/i);
+
+    setValue("address", addressMatch ? addressMatch[1] : "");
+    setValue("client", clientMatch ? clientMatch[1] : "");
+    setValue("appraiser", appraiserMatch ? "Daniel M. Fowler" : "");
+    setValue("effectiveDate", effectiveMatch ? effectiveMatch[1] : "");
+    setValue("appraisedValue", valueMatch ? "$" + valueMatch[1] : "");
+    setValue("reviewedDate", new Date().toLocaleDateString());
+    setValue("reviewer", "Robert McKinnon");
+
+    setYesNo("q5", "YES");
+    setYesNo("q6", lower.includes("assumptions and limiting conditions") ? "YES" : "NO");
+    setYesNo("q7", lower.includes("respectfully submitted") || lower.includes("certification of value") ? "YES" : "NO");
+    setYesNo("q8", lower.includes("reconciliation") || lower.includes("final est. of value") ? "YES" : "NO");
+    setYesNo("q9", lower.includes("personally inspected") || lower.includes("site visit") ? "YES" : "NO");
+    setYesNo("q10", lower.includes("date of value") || lower.includes("effective date of value") ? "YES" : "NO");
+
+    setYesNo("q11", lower.includes("site data") ? "YES" : "NO");
+    setYesNo("q12", lower.includes("vacant") || lower.includes("occupied") ? "YES" : "N/A");
+    setYesNo("q13", lower.includes("description of improvements") || lower.includes("building:") ? "YES" : "NO");
+    setYesNo("q14", lower.includes("mechanical and equipment") ? "YES" : "N/A");
+    setYesNo("q15", lower.includes("tax assessor") || lower.includes("taxes for") ? "YES" : "NO");
+    setYesNo("q16", lower.includes("zoning:") ? "YES" : "NO");
+    setYesNo("q17", lower.includes("mineral rights") ? "YES" : "NO");
+
+    setYesNo("q18", lower.includes("description of improvements") ? "YES" : "NO");
+    setYesNo("q19", lower.includes("deferred maintenance") ? "YES" : "NO");
+    setYesNo("q20", lower.includes("photographs of subject property") ? "YES" : "NO");
+    setYesNo("q21", lower.includes("floor plan") || lower.includes("area calculations summary") ? "YES" : "NO");
+
+    setYesNo("q22", lower.includes("highest and best use") ? "YES" : "NO");
+    setYesNo("q23", lower.includes("land sale no.") || lower.includes("comparable land sales") ? "YES" : "NO");
+    setYesNo("q24", lower.includes("conclusion of land value") ? "YES" : "NO");
+
+    const costUsed = lower.includes("cost approach");
+    setYesNo("q25", costUsed ? "YES" : "NO");
+    setYesNo("q26", lower.includes("depreciation") ? "YES" : costUsed ? "NO" : "N/A");
+    setYesNo("q27", lower.includes("indicated value by cost approach") || lower.includes("cost approach value") ? "YES" : costUsed ? "NO" : "N/A");
+
+    const salesUsed = lower.includes("sales comparison approach");
+    setYesNo("q28", salesUsed ? "YES" : "NO");
+    setYesNo("q29", lower.includes("improved sale no.") || lower.includes("comparable improved sales") ? "YES" : salesUsed ? "NO" : "N/A");
+    setYesNo("q30", lower.includes("final est. of value") || lower.includes("reconciliation") ? "YES" : salesUsed ? "NO" : "N/A");
+
+    const incomeNotUsed = lower.includes("income approach") && (lower.includes("not performed") || lower.includes("n/a"));
+    setYesNo("q31", incomeNotUsed ? "NO" : lower.includes("income approach") ? "YES" : "NO");
+    setYesNo("q32", lower.includes("rent roll") ? "YES" : "NO");
+    setYesNo("q33", lower.includes("comparable rentals") ? "YES" : "NO");
+    setYesNo("q34", lower.includes("direct capitalization") ? "YES" : "NO");
+    setYesNo("q35", lower.includes("discounted cash flow") || lower.includes("dcf") ? "YES" : "NO");
+
+    setYesNo("q36", lower.includes("the three standard approaches") || lower.includes("reconciliation") ? "YES" : "NO");
+    setYesNo("q37", "YES");
+    setYesNo("q38", lower.includes("as is") ? "YES" : lower.includes("as proposed") ? "NO" : "N/A");
+
+    setYesNo("q39", lower.includes("uspap") ? "YES" : "NO");
+    setYesNo("q40", lower.includes("scope of work") || lower.includes("certification of value") ? "YES" : "NO");
+    setYesNo("q41", lower.includes("real estate appraiser number") || lower.includes("certified general") || lower.includes("licensed general") ? "YES" : "NO");
+
+    if (lower.includes("extraordinary assumption")) {
+      setValue("q42", "LOW TO MODERATE RISK");
+      setValue("q43", "The appraisal relies on an extraordinary assumption. Review that assumption carefully and confirm completion or conditions match the report before relying on value.");
+    } else {
+      setValue("q42", "LOW RISK");
+      setValue("q43", "Appraisal appears to contain the core support required by the QC template. Review final value, comparable support, and scope before issuing.");
     }
+
+    status.textContent = "QC auto-filled. Review and edit anything before downloading.";
+  } catch (error) {
+    console.error(error);
+    status.textContent = "Auto-fill failed. PDF text may be blocked or the script hit an error.";
   }
-
-  function sectionTitle(title) {
-    newPageIfNeeded(16);
-    doc.setFillColor(17, 24, 39);
-    doc.rect(15, y - 5, 180, 8, "F");
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text(title, 18, y);
-    doc.setTextColor(0, 0, 0);
-    y += 10;
-  }
-
-  function addField(label, value) {
-    newPageIfNeeded(8);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text(label, 20, y);
-    doc.setFont("helvetica", "normal");
-    const lines = doc.splitTextToSize(String(value || ""), 120);
-    doc.text(lines, 70, y);
-    y += Math.max(7, lines.length * 5);
-  }
-
-  function addQA(question, answer) {
-    newPageIfNeeded(12);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    const qLines = doc.splitTextToSize(question, 130);
-    doc.text(qLines, 20, y);
-    doc.setFont("helvetica", "bold");
-    doc.text(String(answer || ""), 165, y);
-    y += Math.max(10, qLines.length * 5 + 2);
-  }
-
-  function val(id) {
-    return document.getElementById(id).value || "";
-  }
-
-  const logo = new Image();
-  logo.src = "logo.png";
-
-  const buildPdf = () => {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("Commercial Appraisal QC Review", 20, y);
-    y += 12;
-
-    addField("File #:", val("fileNumber"));
-    addField("Address:", val("address"));
-    addField("Appraiser:", val("appraiser"));
-    addField("Effective Date:", val("effectiveDate"));
-    addField("Appraised Value:", val("appraisedValue"));
-    addField("Reviewed Date:", val("reviewedDate"));
-    addField("Reviewer:", val("reviewer"));
-
-    sectionTitle("Introduction and General Information");
-    addQA("5. Does the appraisal report follow the engagement letter instructions?", val("q5"));
-    addQA("6. Are assumptions and limiting conditions stated and reasonable?", val("q6"));
-    addQA("7. Is the appraisal report signed by the appraiser?", val("q7"));
-    addQA("8. Does the transmittal value match reconciliation value?", val("q8"));
-    addQA("9. Was the property inspected?", val("q9"));
-    addQA("10. Is the date of value stated?", val("q10"));
-
-    sectionTitle("Site and Neighborhood Descriptions");
-    addQA("11. Is the site adequately described?", val("q11"));
-    addQA("12. Occupancy identified?", val("q12"));
-    addQA("13. Are improvements present?", val("q13"));
-    addQA("14. Equipment described?", val("q14"));
-    addQA("15. Property tax analysis included?", val("q15"));
-    addQA("16. Zoning described?", val("q16"));
-    addQA("17. Mineral rights addressed?", val("q17"));
-
-    sectionTitle("Improvement Analysis");
-    addQA("18. Are improvements adequately described?", val("q18"));
-    addQA("19. Deferred maintenance noted?", val("q19"));
-    addQA("20. Subject photographs included?", val("q20"));
-    addQA("21. Floor plans included?", val("q21"));
-
-    sectionTitle("Highest & Best Use");
-    addQA("22. Highest & Best Use included?", val("q22"));
-
-    sectionTitle("Land Valuation");
-    addQA("23. Comparable land sales included?", val("q23"));
-    addQA("24. Land value within comp range?", val("q24"));
-
-    sectionTitle("Cost Approach");
-    addQA("25. Cost approach used?", val("q25"));
-    addQA("26. Depreciation explained?", val("q26"));
-    addQA("27. Cost approach reconciled?", val("q27"));
-
-    sectionTitle("Sales Comparison Approach");
-    addQA("28. Sales comparison approach used?", val("q28"));
-    addQA("29. Comparable improved sales included?", val("q29"));
-    addQA("30. Value within comp range?", val("q30"));
-
-    sectionTitle("Income Approach");
-    addQA("31. Income approach used?", val("q31"));
-    addQA("32. Rent roll and operating history included?", val("q32"));
-    addQA("33. Comparable rentals included?", val("q33"));
-    addQA("34. Direct capitalization used?", val("q34"));
-    addQA("35. DCF used?", val("q35"));
-
-    sectionTitle("Reconciliation");
-    addQA("36. Approaches discussed?", val("q36"));
-    addQA("37. Final value within range?", val("q37"));
-    addQA("38. Final value as-is?", val("q38"));
-
-    sectionTitle("FIRREA Appraisal Standards");
-    addQA("39. USPAP compliance evident?", val("q39"));
-    addQA("40. Sufficient information provided?", val("q40"));
-    addQA("41. Appraiser properly licensed?", val("q41"));
-
-    sectionTitle("QACR Appraisal Rating");
-    addQA("42. QACR Rating", val("q42"));
-
-    sectionTitle("Reviewer Notes");
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    const notes = doc.splitTextToSize(val("q43"), 170);
-    newPageIfNeeded(notes.length * 5 + 20);
-    doc.text(notes, 20, y);
-    y += notes.length * 5 + 12;
-
-    newPageIfNeeded(20);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text("Reviewer Signature", 20, y);
-    doc.text("Date", 145, y);
-    y += 8;
-    doc.line(20, y, 95, y);
-    doc.line(145, y, 190, y);
-
-    const fileName = val("fileNumber") ? "QC_" + val("fileNumber") + ".pdf" : "QC.pdf";
-    doc.save(fileName);
-  };
-
-  logo.onload = function () {
-    try {
-      doc.addImage(logo, "PNG", 20, y, 60, 18);
-      y += 24;
-    } catch (e) {}
-    buildPdf();
-  };
-
-  logo.onerror = function () {
-    buildPdf();
-  };
 }
