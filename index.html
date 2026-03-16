@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Eppraisal Network QC Tool</title>
+<style>
+body {font-family: Arial; background:#f4f6f8; padding:40px;}
+.container {background:white; padding:30px; max-width:700px; margin:auto; border-radius:10px;}
+button {padding:10px 20px; background:#1f4e79; color:white; border:none; border-radius:5px;}
+input,textarea {width:100%; padding:8px; margin:8px 0;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Eppraisal Network QC Tool</h2>
+
+<label>File Number</label>
+<input id="fileNumber">
+
+<label>Address</label>
+<input id="address">
+
+<label>Appraiser</label>
+<input id="appraiser">
+
+<label>Appraised Value</label>
+<input id="value">
+
+<label>Reviewer Notes</label>
+<textarea id="notes"></textarea>
+
+<button onclick="downloadQC()">Download QC PDF</button>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+
+function downloadQC(){
+
+const { jsPDF } = window.jspdf;
+
+let doc = new jsPDF();
+
+let file = document.getElementById("fileNumber").value;
+let address = document.getElementById("address").value;
+let appraiser = document.getElementById("appraiser").value;
+let value = document.getElementById("value").value;
+let notes = document.getElementById("notes").value;
+
+doc.setFontSize(16);
+doc.text("Eppraisal Network QC Review",20,20);
+
+doc.setFontSize(12);
+
+doc.text("File Number: " + file,20,40);
+doc.text("Address: " + address,20,50);
+doc.text("Appraiser: " + appraiser,20,60);
+doc.text("Appraised Value: " + value,20,70);
+
+doc.text("Reviewer Notes:",20,90);
+doc.text(notes,20,100);
+
+doc.save("QC_"+file+".pdf");
+
+}
+
+</script>
+
+</body>
+</html>
