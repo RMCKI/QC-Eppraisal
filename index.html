@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,16 +11,16 @@
       background: #f4f6f8;
       margin: 0;
       padding: 20px;
-      color: #1f2937;
+      color: #111827;
     }
     .container {
       max-width: 1100px;
       margin: auto;
     }
     .card {
-      background: white;
+      background: #ffffff;
       border-radius: 12px;
-      padding: 20px;
+      padding: 22px;
       margin-bottom: 20px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
@@ -34,6 +35,11 @@
     }
     h1, h2 {
       margin-top: 0;
+    }
+    .subnote {
+      color: #475569;
+      font-size: 13px;
+      margin-top: 8px;
     }
     .grid {
       display: grid;
@@ -56,9 +62,10 @@
       border-radius: 8px;
       box-sizing: border-box;
       font-size: 14px;
+      background: white;
     }
     textarea {
-      min-height: 90px;
+      min-height: 110px;
       resize: vertical;
     }
     .section-title {
@@ -66,25 +73,27 @@
       color: white;
       padding: 10px 12px;
       border-radius: 8px;
-      margin: 20px 0 10px 0;
+      margin: 22px 0 10px 0;
       font-size: 15px;
+      font-weight: bold;
     }
     .question-row {
       display: grid;
-      grid-template-columns: 1fr 180px;
+      grid-template-columns: 1fr 190px;
       gap: 12px;
       align-items: center;
-      padding: 8px 0;
+      padding: 9px 0;
       border-bottom: 1px solid #e5e7eb;
     }
     .question-text {
       font-size: 14px;
+      line-height: 1.35;
     }
     .btn-row {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
-      margin-top: 15px;
+      margin-top: 18px;
     }
     button {
       padding: 12px 18px;
@@ -98,17 +107,13 @@
     button.secondary {
       background: #475569;
     }
-    .note {
-      font-size: 13px;
-      color: #475569;
-      margin-top: 8px;
-    }
-    .success {
-      color: green;
-      font-weight: bold;
+    .small-actions {
       margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    @media (max-width: 800px) {
+    @media (max-width: 850px) {
       .grid {
         grid-template-columns: 1fr;
       }
@@ -120,62 +125,50 @@
 </head>
 <body>
   <div class="container">
+
     <div class="card">
       <div class="logo-wrap">
-        <img src="https://raw.githubusercontent.com/RMCKI/QC-Eppraisal/main/logo.png" alt="Eppraisal Network Logo" onerror="this.style.display='none'">
+        <img src="logo.png" alt="Eppraisal Network Logo" onerror="this.style.display='none'">
       </div>
-      <h1>Eppraisal Network QC Tool</h1>
-      <div class="note">Upload an appraisal PDF, auto-fill the QC, edit if needed, then export the QC PDF.</div>
+      <h1>Commercial Appraisal QC Review</h1>
+      <div class="subnote">This version is built to follow your real QC template structure and numbering.</div>
     </div>
 
     <div class="card">
-      <h2>Upload Appraisal PDF</h2>
-      <input type="file" id="pdfUpload" accept=".pdf" />
-      <div class="btn-row">
-        <button onclick="autoFillFromPDF()">Auto Fill From PDF</button>
-      </div>
-      <div id="status" class="success"></div>
-    </div>
-
-    <div class="card">
-      <h2>QC Header Information</h2>
+      <h2>Header Information</h2>
       <div class="grid">
         <div>
-          <label>File Number</label>
+          <label>File #</label>
           <input id="fileNumber" placeholder="71506">
         </div>
         <div>
-          <label>Client</label>
-          <input id="client">
-        </div>
-        <div>
-          <label>Borrower</label>
-          <input id="borrower">
+          <label>Address</label>
+          <input id="address" placeholder="Property address">
         </div>
         <div>
           <label>Appraiser</label>
-          <input id="appraiser">
-        </div>
-        <div class="full">
-          <label>Address</label>
-          <input id="address">
+          <input id="appraiser" placeholder="Appraiser name">
         </div>
         <div>
           <label>Effective Date</label>
-          <input id="effectiveDate">
+          <input id="effectiveDate" placeholder="Effective date">
         </div>
         <div>
           <label>Appraised Value</label>
-          <input id="appraisedValue">
+          <input id="appraisedValue" placeholder="$0">
         </div>
         <div>
           <label>Reviewed Date</label>
-          <input id="reviewedDate">
+          <input id="reviewedDate" placeholder="Reviewed date">
         </div>
-        <div>
+        <div class="full">
           <label>Reviewer</label>
           <input id="reviewer" value="Robert McKinnon">
         </div>
+      </div>
+
+      <div class="small-actions">
+        <button onclick="fillSample71506()">Load Sample 71506</button>
       </div>
     </div>
 
@@ -240,7 +233,8 @@
       <div class="question-row"><div class="question-text">41. Appraiser properly licensed?</div><select id="q41"><option></option><option>YES</option><option>NO</option><option>N/A</option></select></div>
 
       <div class="section-title">QACR Appraisal Rating</div>
-      <div class="question-row"><div class="question-text">42. QACR Rating</div>
+      <div class="question-row">
+        <div class="question-text">42. QACR Rating</div>
         <select id="q42">
           <option></option>
           <option>LOW RISK</option>
@@ -252,150 +246,208 @@
 
       <div class="section-title">Reviewer Notes</div>
       <label>43. Reviewer Notes</label>
-      <textarea id="q43"></textarea>
+      <textarea id="q43" placeholder="Enter reviewer notes"></textarea>
 
-     <div class="btn-row">
-  <button onclick="autoFillFromPDF()">Auto Fill From PDF</button>
-</div>
-<div id="status" class="success"></div>
-      <div id="status" class="success"></div>
+      <div class="btn-row">
+        <button class="secondary" onclick="downloadQC()">Download QC PDF</button>
+      </div>
+    </div>
+  </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+    function v(id) {
+      return document.getElementById(id).value || "";
+    }
 
-    function setValue(id, value) {
-      if (document.getElementById(id)) {
-        document.getElementById(id).value = value || "";
+    function fillSample71506() {
+      document.getElementById("fileNumber").value = "71506";
+      document.getElementById("address").value = "1952 Walnut Street, Shreveport, LA 71103";
+      document.getElementById("appraiser").value = "Daniel M. Fowler";
+      document.getElementById("effectiveDate").value = "07/01/2026 (As Proposed)";
+      document.getElementById("appraisedValue").value = "$150,000";
+      document.getElementById("reviewedDate").value = new Date().toLocaleDateString();
+      document.getElementById("reviewer").value = "Robert McKinnon";
+
+      const sample = {
+        q5:"YES", q6:"YES", q7:"YES", q8:"YES", q9:"YES", q10:"YES",
+        q11:"YES", q12:"YES", q13:"YES", q14:"YES", q15:"YES", q16:"YES", q17:"YES",
+        q18:"YES", q19:"NO", q20:"YES", q21:"YES",
+        q22:"YES",
+        q23:"YES", q24:"YES",
+        q25:"YES", q26:"YES", q27:"YES",
+        q28:"YES", q29:"YES", q30:"YES",
+        q31:"NO", q32:"NO", q33:"NO", q34:"NO", q35:"NO",
+        q36:"YES", q37:"YES", q38:"NO",
+        q39:"YES", q40:"YES", q41:"YES",
+        q42:"LOW TO MODERATE RISK"
+      };
+
+      Object.keys(sample).forEach(id => {
+        document.getElementById(id).value = sample[id];
+      });
+
+      document.getElementById("q43").value =
+        "The appraisal includes both the Cost and Sales Comparison approaches. The Income Approach was not developed due to lack of reliable rental data. The report relies on an extraordinary assumption that renovations will be completed as proposed. The value conclusion appears reasonable within the context of the analysis.";
+    }
+
+    function downloadQC() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 20;
+      const pageHeight = doc.internal.pageSize.height;
+
+      function newPageIfNeeded(extra = 12) {
+        if (y + extra > pageHeight - 20) {
+          doc.addPage();
+          y = 20;
+        }
       }
+
+      function sectionTitle(title) {
+        newPageIfNeeded(16);
+        doc.setFillColor(17, 24, 39);
+        doc.rect(15, y - 5, 180, 8, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.text(title, 18, y);
+        doc.setTextColor(0, 0, 0);
+        y += 10;
+      }
+
+      function addField(label, value) {
+        newPageIfNeeded(8);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text(label, 20, y);
+        doc.setFont("helvetica", "normal");
+        const lines = doc.splitTextToSize(String(value || ""), 120);
+        doc.text(lines, 70, y);
+        y += Math.max(7, lines.length * 5);
+      }
+
+      function addQA(question, answer) {
+        newPageIfNeeded(12);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        const qLines = doc.splitTextToSize(question, 130);
+        doc.text(qLines, 20, y);
+        doc.setFont("helvetica", "bold");
+        doc.text(String(answer || ""), 165, y);
+        y += Math.max(10, qLines.length * 5 + 2);
+      }
+
+      const logo = new Image();
+      logo.src = "logo.png";
+
+      const buildPdf = () => {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text("Commercial Appraisal QC Review", 20, y);
+        y += 12;
+
+        addField("File #:", v("fileNumber"));
+        addField("Address:", v("address"));
+        addField("Appraiser:", v("appraiser"));
+        addField("Effective Date:", v("effectiveDate"));
+        addField("Appraised Value:", v("appraisedValue"));
+        addField("Reviewed Date:", v("reviewedDate"));
+        addField("Reviewer:", v("reviewer"));
+
+        sectionTitle("Introduction and General Information");
+        addQA("5. Does the appraisal report follow the engagement letter instructions?", v("q5"));
+        addQA("6. Are assumptions and limiting conditions stated and reasonable?", v("q6"));
+        addQA("7. Is the appraisal report signed by the appraiser?", v("q7"));
+        addQA("8. Does the transmittal value match reconciliation value?", v("q8"));
+        addQA("9. Was the property inspected?", v("q9"));
+        addQA("10. Is the date of value stated?", v("q10"));
+
+        sectionTitle("Site and Neighborhood Descriptions");
+        addQA("11. Is the site adequately described?", v("q11"));
+        addQA("12. Occupancy identified?", v("q12"));
+        addQA("13. Are improvements present?", v("q13"));
+        addQA("14. Equipment described?", v("q14"));
+        addQA("15. Property tax analysis included?", v("q15"));
+        addQA("16. Zoning described?", v("q16"));
+        addQA("17. Mineral rights addressed?", v("q17"));
+
+        sectionTitle("Improvement Analysis");
+        addQA("18. Are improvements adequately described?", v("q18"));
+        addQA("19. Deferred maintenance noted?", v("q19"));
+        addQA("20. Subject photographs included?", v("q20"));
+        addQA("21. Floor plans included?", v("q21"));
+
+        sectionTitle("Highest & Best Use");
+        addQA("22. Highest & Best Use included?", v("q22"));
+
+        sectionTitle("Land Valuation");
+        addQA("23. Comparable land sales included?", v("q23"));
+        addQA("24. Land value within comp range?", v("q24"));
+
+        sectionTitle("Cost Approach");
+        addQA("25. Cost approach used?", v("q25"));
+        addQA("26. Depreciation explained?", v("q26"));
+        addQA("27. Cost approach reconciled?", v("q27"));
+
+        sectionTitle("Sales Comparison Approach");
+        addQA("28. Sales comparison approach used?", v("q28"));
+        addQA("29. Comparable improved sales included?", v("q29"));
+        addQA("30. Value within comp range?", v("q30"));
+
+        sectionTitle("Income Approach");
+        addQA("31. Income approach used?", v("q31"));
+        addQA("32. Rent roll and operating history included?", v("q32"));
+        addQA("33. Comparable rentals included?", v("q33"));
+        addQA("34. Direct capitalization used?", v("q34"));
+        addQA("35. DCF used?", v("q35"));
+
+        sectionTitle("Reconciliation");
+        addQA("36. Approaches discussed?", v("q36"));
+        addQA("37. Final value within range?", v("q37"));
+        addQA("38. Final value as-is?", v("q38"));
+
+        sectionTitle("FIRREA Appraisal Standards");
+        addQA("39. USPAP compliance evident?", v("q39"));
+        addQA("40. Sufficient information provided?", v("q40"));
+        addQA("41. Appraiser properly licensed?", v("q41"));
+
+        sectionTitle("QACR Appraisal Rating");
+        addQA("42. QACR Rating", v("q42"));
+
+        sectionTitle("Reviewer Notes");
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        const notes = doc.splitTextToSize(v("q43"), 170);
+        newPageIfNeeded(notes.length * 5 + 20);
+        doc.text(notes, 20, y);
+        y += notes.length * 5 + 12;
+
+        newPageIfNeeded(20);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text("Reviewer Signature", 20, y);
+        doc.text("Date", 145, y);
+        y += 8;
+        doc.line(20, y, 95, y);
+        doc.line(145, y, 190, y);
+
+        const fileName = v("fileNumber") ? "QC_" + v("fileNumber") + ".pdf" : "QC.pdf";
+        doc.save(fileName);
+      };
+
+      logo.onload = function () {
+        try {
+          doc.addImage(logo, "PNG", 20, y, 60, 18);
+          y += 24;
+        } catch (e) {}
+        buildPdf();
+      };
+
+      logo.onerror = function () {
+        buildPdf();
+      };
     }
-
-    function setYesNo(id, value) {
-      setValue(id, value);
-    }
-
-   async function autoFillFromPDF() {
-  const fileInput = document.getElementById("pdfUpload");
-  const status = document.getElementById("status");
-
-  if (!fileInput.files.length) {
-    status.textContent = "Please upload a PDF first.";
-    return;
-  }
-
-  try {
-    status.textContent = "Reading PDF...";
-
-    const file = fileInput.files[0];
-    const arrayBuffer = await file.arrayBuffer();
-
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    let fullText = "";
-
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items
-        .map(item => ("str" in item ? item.str : ""))
-        .join(" ");
-      fullText += " " + pageText;
-    }
-
-    const text = fullText.replace(/\s+/g, " ").trim();
-    const lower = text.toLowerCase();
-
-    if (!text || text.length < 50) {
-      status.textContent = "No readable text found in this PDF. It may be scanned or image-only.";
-      return;
-    }
-
-    status.textContent = "PDF text found. Auto-filling QC...";
-
-    const addressMatch = text.match(/LOCATED AT\s+(.*?)\s+PREPARED FOR/i) ||
-                         text.match(/ADDRESS:\s*(.*?)\s+(LEGAL|IMPROVEMENT SIZE|SITE AREA|INTENDED USER)/i);
-
-    const clientMatch = text.match(/PREPARED FOR\s+(.*?)\s+PO BOX/i) ||
-                        text.match(/INTENDED USER:\s*(.*?)\s+INTENDED USE/i);
-
-    const valueMatch = text.match(/FINAL EST\. OF VALUE:\s*\$([\d,]+)/i) ||
-                       text.match(/APPRAISED VALUE:\s*\$([\d,]+)/i) ||
-                       text.match(/---\$(\d[\d,]*)/i);
-
-    const appraiserMatch = text.match(/BY\s+CYPRESS VALUATION\s+(.+?)\s+\d{3,4}\s+IRVING PLACE/i) ||
-                           text.match(/Daniel M\. Fowler/i);
-
-    const effectiveMatch = text.match(/DATE OF VALUE:\s*(.*?)\s+DATE OF SITE VISIT/i) ||
-                           text.match(/AS OF\s+(.*?)\s+\(/i);
-
-    setValue("address", addressMatch ? addressMatch[1] : "");
-    setValue("client", clientMatch ? clientMatch[1] : "");
-    setValue("appraiser", appraiserMatch ? "Daniel M. Fowler" : "");
-    setValue("effectiveDate", effectiveMatch ? effectiveMatch[1] : "");
-    setValue("appraisedValue", valueMatch ? "$" + valueMatch[1] : "");
-    setValue("reviewedDate", new Date().toLocaleDateString());
-    setValue("reviewer", "Robert McKinnon");
-
-    setYesNo("q5", "YES");
-    setYesNo("q6", lower.includes("assumptions and limiting conditions") ? "YES" : "NO");
-    setYesNo("q7", lower.includes("respectfully submitted") || lower.includes("certification of value") ? "YES" : "NO");
-    setYesNo("q8", lower.includes("reconciliation") || lower.includes("final est. of value") ? "YES" : "NO");
-    setYesNo("q9", lower.includes("personally inspected") || lower.includes("site visit") ? "YES" : "NO");
-    setYesNo("q10", lower.includes("date of value") || lower.includes("effective date of value") ? "YES" : "NO");
-
-    setYesNo("q11", lower.includes("site data") ? "YES" : "NO");
-    setYesNo("q12", lower.includes("vacant") || lower.includes("occupied") ? "YES" : "N/A");
-    setYesNo("q13", lower.includes("description of improvements") || lower.includes("building:") ? "YES" : "NO");
-    setYesNo("q14", lower.includes("mechanical and equipment") ? "YES" : "N/A");
-    setYesNo("q15", lower.includes("tax assessor") || lower.includes("taxes for") ? "YES" : "NO");
-    setYesNo("q16", lower.includes("zoning:") ? "YES" : "NO");
-    setYesNo("q17", lower.includes("mineral rights") ? "YES" : "NO");
-
-    setYesNo("q18", lower.includes("description of improvements") ? "YES" : "NO");
-    setYesNo("q19", lower.includes("deferred maintenance") ? "YES" : "NO");
-    setYesNo("q20", lower.includes("photographs of subject property") ? "YES" : "NO");
-    setYesNo("q21", lower.includes("floor plan") || lower.includes("area calculations summary") ? "YES" : "NO");
-
-    setYesNo("q22", lower.includes("highest and best use") ? "YES" : "NO");
-    setYesNo("q23", lower.includes("land sale no.") || lower.includes("comparable land sales") ? "YES" : "NO");
-    setYesNo("q24", lower.includes("conclusion of land value") ? "YES" : "NO");
-
-    const costUsed = lower.includes("cost approach");
-    setYesNo("q25", costUsed ? "YES" : "NO");
-    setYesNo("q26", lower.includes("depreciation") ? "YES" : costUsed ? "NO" : "N/A");
-    setYesNo("q27", lower.includes("indicated value by cost approach") || lower.includes("cost approach value") ? "YES" : costUsed ? "NO" : "N/A");
-
-    const salesUsed = lower.includes("sales comparison approach");
-    setYesNo("q28", salesUsed ? "YES" : "NO");
-    setYesNo("q29", lower.includes("improved sale no.") || lower.includes("comparable improved sales") ? "YES" : salesUsed ? "NO" : "N/A");
-    setYesNo("q30", lower.includes("final est. of value") || lower.includes("reconciliation") ? "YES" : salesUsed ? "NO" : "N/A");
-
-    const incomeNotUsed = lower.includes("income approach") && (lower.includes("not performed") || lower.includes("n/a"));
-    setYesNo("q31", incomeNotUsed ? "NO" : lower.includes("income approach") ? "YES" : "NO");
-    setYesNo("q32", lower.includes("rent roll") ? "YES" : "NO");
-    setYesNo("q33", lower.includes("comparable rentals") ? "YES" : "NO");
-    setYesNo("q34", lower.includes("direct capitalization") ? "YES" : "NO");
-    setYesNo("q35", lower.includes("discounted cash flow") || lower.includes("dcf") ? "YES" : "NO");
-
-    setYesNo("q36", lower.includes("the three standard approaches") || lower.includes("reconciliation") ? "YES" : "NO");
-    setYesNo("q37", "YES");
-    setYesNo("q38", lower.includes("as is") ? "YES" : lower.includes("as proposed") ? "NO" : "N/A");
-
-    setYesNo("q39", lower.includes("uspap") ? "YES" : "NO");
-    setYesNo("q40", lower.includes("scope of work") || lower.includes("certification of value") ? "YES" : "NO");
-    setYesNo("q41", lower.includes("real estate appraiser number") || lower.includes("certified general") || lower.includes("licensed general") ? "YES" : "NO");
-
-    if (lower.includes("extraordinary assumption")) {
-      setValue("q42", "LOW TO MODERATE RISK");
-      setValue("q43", "The appraisal relies on an extraordinary assumption. Review that assumption carefully and confirm completion or conditions match the report before relying on value.");
-    } else {
-      setValue("q42", "LOW RISK");
-      setValue("q43", "Appraisal appears to contain the core support required by the QC template. Review final value, comparable support, and scope before issuing.");
-    }
-
-    status.textContent = "QC auto-filled. Review and edit anything before downloading.";
-  } catch (error) {
-    console.error(error);
-    status.textContent = "Auto-fill failed. PDF text may be blocked or the script hit an error.";
-  }
-}
+  </script>
+</body>
+</html>
