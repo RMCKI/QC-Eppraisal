@@ -319,7 +319,8 @@
         }
 
         const addressMatch =
-  text.match(/(property address|address|located at)\s*[:\-]?\s*(.*?)(\n|legal|parcel|owner|borrower)/i);
+ const addressMatch =
+  text.match(/(municipal address|property address|address|located at)\s*[:\-]?\s*(.*?)(\n|legal|parcel|owner|borrower)/i);
 
 const appraiserMatch =
   text.match(/(appraiser|prepared by|by)\s*[:\-]?\s*(.*?)(\n|license|certification|effective)/i);
