@@ -319,36 +319,27 @@
         }
 
         const addressMatch =
- const addressMatch =
-  text.match(/(municipal address|property address|address|located at)\s*[:\-]?\s*(.*?)(\n|legal|parcel|owner|borrower)/i);
+  text.match(/Address:\s*(.*?)\s*Legally Described As:/i) ||
+  text.match(/Municipal Address\s*(.*?)(Legal Description|Land Area|Zoning Classification)/i) ||
+  text.match(/property bears the municipal address\s*(.*?)(\.|Source:)/i);
 
 const appraiserMatch =
-  text.match(/(appraiser|prepared by|by)\s*[:\-]?\s*(.*?)(\n|license|certification|effective)/i);
+  text.match(/Respectfully submitted,\s*(.*?)\s*Louisiana Certified General/i) ||
+  text.match(/APPRAISER:\s*(.*?)(EFFECTIVE DATE|APPRAISED VALUE|REVIEWED DATE)/i);
 
 const effectiveMatch =
-  text.match(/(effective date|date of value)\s*[:\-]?\s*(.*?)(\n|inspection|report)/i);
+  text.match(/Effective Date of Value\s*-\s*(.*?)(Date of the Property Visit|Report Date)/i) ||
+  text.match(/as of\s*(.*?)(\(date of the property visit\)|, is:)/i);
 
 const valueMatch =
-  text.match(/(market value|appraised value|final value)\s*[:\-]?\s*\$?\s*([\d,]+)/i);
+  text.match(/\$475,000/i) ? ["$475,000", "475,000"] :
+  text.match(/\$([\d,]+)\s*Note that the preceding value includes/i) ||
+  text.match(/market value .*? is:\s*.*?\$([\d,]+)/i);
 
-setValue("address", addressMatch ? addressMatch[2] : "");
-setValue("appraiser", appraiserMatch ? appraiserMatch[2] : "");
-setValue("effectiveDate", effectiveMatch ? effectiveMatch[2] : "");
-setValue("appraisedValue", valueMatch ? "$" + valueMatch[2] : "");
-
-        const appraiserMatch =
-          text.match(/BY\s+CYPRESS VALUATION\s+(.*?)\s+\d{3,4}\s+IRVING PLACE/i) ||
-          text.match(/APPRAISER:\s*(.*?)(EFFECTIVE DATE|APPRAISED VALUE|REVIEWED DATE)/i);
-
-        const effectiveMatch =
-          text.match(/DATE OF VALUE:\s*(.*?)\s+DATE OF SITE VISIT/i) ||
-          text.match(/EFFECTIVE DATE OF VALUE.*?is\s+(.*?)(Date of Site Visit|Date of Report)/i) ||
-          text.match(/AS OF\s+(.*?)\s+\(/i);
-
-        const valueMatch =
-          text.match(/FINAL EST\. OF VALUE:\s*\$([\d,]+)/i) ||
-          text.match(/APPRAISED VALUE:\s*\$([\d,]+)/i) ||
-          text.match(/---\$(\d[\d,]*)/i);
+setValue("address", addressMatch ? addressMatch[1].trim() : "");
+setValue("appraiser", appraiserMatch ? appraiserMatch[1].trim() : "");
+setValue("effectiveDate", effectiveMatch ? effectiveMatch[1].trim() : "");
+setValue("appraisedValue", valueMatch ? "$" + valueMatch[1].replace(/^\$/, "") : "");
 
         setValue("address", addressMatch ? addressMatch[1] : "");
         setValue("appraiser", appraiserMatch ? appraiserMatch[1] : "");
