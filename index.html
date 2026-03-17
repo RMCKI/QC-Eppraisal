@@ -319,8 +319,21 @@
         }
 
         const addressMatch =
-          text.match(/LOCATED AT\s+(.*?)\s+PREPARED FOR/i) ||
-          text.match(/ADDRESS:\s*(.*?)\s+(LEGAL|IMPROVEMENT SIZE|SITE AREA|INTENDED USER)/i);
+  text.match(/(property address|address|located at)\s*[:\-]?\s*(.*?)(\n|legal|parcel|owner|borrower)/i);
+
+const appraiserMatch =
+  text.match(/(appraiser|prepared by|by)\s*[:\-]?\s*(.*?)(\n|license|certification|effective)/i);
+
+const effectiveMatch =
+  text.match(/(effective date|date of value)\s*[:\-]?\s*(.*?)(\n|inspection|report)/i);
+
+const valueMatch =
+  text.match(/(market value|appraised value|final value)\s*[:\-]?\s*\$?\s*([\d,]+)/i);
+
+setValue("address", addressMatch ? addressMatch[2] : "");
+setValue("appraiser", appraiserMatch ? appraiserMatch[2] : "");
+setValue("effectiveDate", effectiveMatch ? effectiveMatch[2] : "");
+setValue("appraisedValue", valueMatch ? "$" + valueMatch[2] : "");
 
         const appraiserMatch =
           text.match(/BY\s+CYPRESS VALUATION\s+(.*?)\s+\d{3,4}\s+IRVING PLACE/i) ||
