@@ -438,7 +438,11 @@
 
       logo.onload = function () {
         try {
-          doc.addImage(logo, "PNG", 20, y, 60, 18);
+          const pageWidth = doc.internal.pageSize.getWidth();
+const imgWidth = 60;
+const x = (pageWidth - imgWidth) / 2;
+
+doc.addImage(logo, "PNG", x, y, imgWidth, 18);
           y += 24;
         } catch (e) {}
         buildPdf();
